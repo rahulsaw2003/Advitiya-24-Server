@@ -171,3 +171,14 @@ export const logoutUser = async (req, res) => {
 		res.status(500).json({ status: 500, message: error.message });
 	}
 };
+
+export const getAllUsers = aync(req, res) => {
+	try {
+		const allUsers = await User.find({}).select("-password -tokens");
+		res.status(200).json({ message: "All Users fetched successfully", allUsers, status: 200 });
+		console.log("All Users fetched successfully");
+	} catch (error) {
+		console.log(error.message);
+		res.status(500).json({ status: 500, message: error.message });
+	}
+};
