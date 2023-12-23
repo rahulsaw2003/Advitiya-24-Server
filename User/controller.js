@@ -172,7 +172,7 @@ export const logoutUser = async (req, res) => {
 	}
 };
 
-export const getAllUsers = aync(req, res) => {
+export const getAllUsers = async(req, res) => {
 	try {
 		const allUsers = await User.find({}).select("-password -tokens");
 		res.status(200).json({ message: "All Users fetched successfully", allUsers, status: 200 });
