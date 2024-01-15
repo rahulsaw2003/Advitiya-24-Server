@@ -26,12 +26,10 @@ const userSchema = mongoose.Schema(
 		mobile: {
 			type: String,
 			required: [true, "Please enter a 10-digit mobile number!"],
-			unique: true,
 			minLength: [10, "Please enter a valid 10-digit mobile number!"],
 		},
 		password: {
 			type: String,
-			required: [true, "Please enter your password!"],
 		},
 		tokens: [
 			{
@@ -41,7 +39,11 @@ const userSchema = mongoose.Schema(
 				},
 			},
 		],
+		resetPasswordToken: {
+			type: String,
+		},
 	},
+
 	{ timestamps: true }
 );
 
@@ -64,8 +66,29 @@ userSchema.methods.generateAuthToken = async function () {
 		await this.save();
 		return token;
 	} catch (err) {
-		console.log("Model", err.message);
-		res.status(500).json({ message: "Something went wrong while generating token", error });
+		console.log("Something went wrong while generating token", err.message);
+		res.status(500).json({ message: "Something went wrong while generating token", err });
+	}
+};
+
+// *** Generating Password Reset Token ***
+userSchema.methods.getResetPasswordToken = async function () {
+	try {
+		// Generating Token
+		let resetToken = await jwt.sign({ email: this.email, id: this._id }, process.env.JWT_SECRET, {
+			expiresIn: "15m",
+		});
+
+		// Hashing and setting to resetPasswordToken
+		this.resetPasswordToken = await bcrypt.hash(resetToken, 10);
+
+		// Save the user with the resetPasswordToken
+		await this.save();
+
+		return resetToken;
+	} catch (error) {
+		console.log("Something went wrong while generating reset password token", err.message);
+		res.status(500).json({ message: "Something went wrong while generating reset password token", err });
 	}
 };
 

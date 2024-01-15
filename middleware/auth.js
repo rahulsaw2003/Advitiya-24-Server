@@ -18,6 +18,6 @@ export const isUser = async (req, res, next) => {
 		next();
 	} catch (error) {
 		console.log(error.message);
-		res.status(401).json({ message: "Unauthorized: No token provided" });
+		res.status(401).json({ message: "Unauthorized: No token provided", error });
 	}
 };

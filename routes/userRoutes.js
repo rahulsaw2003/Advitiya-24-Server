@@ -1,13 +1,14 @@
 import express from "express";
-import { loginUser, registerUser, logoutUser, validateUser, googleLogin, getAllUsers } from "../User/controller.js";
+import { loginUser, registerUser, logoutUser, validateUser, forgotPassword, resetPassword } from "../User/controller.js";
 import { isUser } from "../middleware/auth.js";
+import User from "../User/model.js";
+import passport from "passport";
+import sendEmail from "../utils/sendEmail.js";
 
 const router = express.Router();
 
 // SignUP Route
 router.post("/register", registerUser);
-
-router.get("/all", getAllUsers);
 
 // SIGNIN Route
 router.post("/login", loginUser);
@@ -18,8 +19,138 @@ router.get("/validate", isUser, validateUser);
 // LOGOUT Route
 router.get("/logout", isUser, logoutUser);
 
-// Google Login Route
-router.post("/googlelogin", googleLogin);
+//Forgot Password
+router.post("/password/forgot", forgotPassword);
 
+//Reset Password
+router.put("/password/reset/:userId/:token", resetPassword);
+
+// Google Login Route
+router.get("/auth/google", passport.authenticate("google", { scope: ["email", "profile"] }));
+
+router.get("/auth/google/callback", (req, res, next) => {
+	passport.authenticate("google", async (err, user, info) => {
+		if (err) {
+			console.error(err);
+			return next(err);
+		}
+		if (!user) {
+			// Handle authentication failure
+			console.log("Authentication failed");
+			return res.redirect("http://localhost:3000/login");
+		}
+
+		try {
+			// Check if the user already exists in the database based on the email
+			const existingUser = await User.findOne({ email: user.email });
+
+			if (existingUser) {
+				// User already exists, log in the user
+				req.logIn(existingUser, (loginErr) => {
+					if (loginErr) {
+						console.error(loginErr);
+						return next(loginErr);
+					}
+					console.log("Existing user logged in:", existingUser);
+					return res.redirect("http://localhost:3000/dashboard");
+				});
+			} else {
+				// User does not exist, log in the new user
+				req.logIn(user, (loginErr) => {
+					if (loginErr) {
+						console.error(loginErr);
+						return next(loginErr);
+					}
+					console.log("New user logged in:", user);
+					// Redirect with user's name, email, and image as query parameters
+					const redirectUrl = `http://localhost:3000/google-auth/mobile?image=${user.image}&name=${user.displayName}&email=${user.email}`;
+					return res.redirect(redirectUrl);
+				});
+			}
+		} catch (dbError) {
+			console.error("Database error:", dbError);
+			return next(dbError);
+		}
+	})(req, res, next);
+});
+
+router.get("/auth/google/login/success", async (req, res) => {
+	if (req.user) {
+		try {
+			const isUser = await User.findOne({ email: req.user.email });
+
+			if (isUser) {
+				// User exists in the database
+				const token = await isUser.generateAuthToken();
+
+				res.json({
+					success: true,
+					message: "User has successfully authenticated",
+					user: req.user,
+					token: token,
+				});
+			} else {
+				res.json({
+					success: false,
+					message: "User not found in the database",
+				});
+			}
+		} catch (error) {
+			console.error("Error finding user:", error);
+			res.status(500).json({
+				success: false,
+				message: "Internal server error",
+			});
+		}
+	} else {
+		res.json({
+			success: false,
+			message: "User has not been authenticated",
+		});
+	}
+});
+router.post("/auth/google/register", async (req, res) => {
+	const { name, email, mobile, college } = req.body;
+	try {
+		const newUser = await User.create({ name, email, mobile, college_name: college });
+
+		const token = await newUser.generateAuthToken();
+		await newUser.save();
+
+		// sending email
+		const message = "User registered successfully at ADVITIYA Website. Please login to continue!";
+		sendEmail({
+			email: newUser.email,
+			subject: "User Registered Successfully!",
+			message,
+		})
+			.then((info) => {
+				console.log("User Registered Successfully & verification email sent.");
+				res.status(201).json({ message: "User registered successfully", success: true, user: newUser, token, emailInfo: info });
+			})
+			.catch((error) => {
+				console.error(error.message);
+				res.status(500).json({ message: "Something went wrong while sending the email", error });
+			});
+	} catch (err) {
+		res.status(500).json({
+			success: false,
+			message: "Something went wrong while registering user",
+			err,
+		});
+		console.log(err);
+	}
+});
+
+router.get("/auth/google/logout", (req, res) => {
+	req.logout(function (err) {
+		if (err) {
+			return res.status(500).json({
+				message: err,
+			});
+		}
+		res.redirect("http://localhost:3000/");
+	});
+});
 
 export default router;

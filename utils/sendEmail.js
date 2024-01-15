@@ -2,9 +2,9 @@ import nodeMailer from "nodemailer";
 
 const sendEmail = async (options) => {
 	const transporter = nodeMailer.createTransport({
-		service: process.env.SMTP_SERVICE,
-		host: process.env.SMTP_HOST,
-		port: process.env.SMTP_PORT,
+		service: "gmail",
+		host: "smtp.gmail.com",
+		port: 465,
 		secure: true,
 		auth: {
 			user: process.env.SMTP_EMAIL,
@@ -14,7 +14,7 @@ const sendEmail = async (options) => {
 
 	const mailOptions = {
 		from: {
-			name: process.env.SMTP_FROM_NAME,
+			name: "Advitiya IIT Ropar",
 			address: process.env.SMTP_EMAIL,
 		},
 		to: options.email,
