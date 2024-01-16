@@ -37,7 +37,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 		if (!user) {
 			// Handle authentication failure
 			console.log("Authentication failed");
-			return res.redirect("http://localhost:3000/login");
+			return res.redirect(`${process.env.REACT_APP_URL}/ login`);
 		}
 
 		try {
@@ -52,7 +52,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 						return next(loginErr);
 					}
 					console.log("Existing user logged in:", existingUser);
-					return res.redirect("http://localhost:3000/dashboard");
+					return res.redirect(`${process.env.REACT_APP_URL}/dashboard`);
 				});
 			} else {
 				// User does not exist, log in the new user
@@ -63,7 +63,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 					}
 					console.log("New user logged in:", user);
 					// Redirect with user's name, email, and image as query parameters
-					const redirectUrl = `http://localhost:3000/google-auth/mobile?image=${user.image}&name=${user.displayName}&email=${user.email}`;
+					const redirectUrl = `${process.env.REACT_APP_URL}/google-auth/mobile?image=${user.image}&name=${user.displayName}&email=${user.email}`;
 					return res.redirect(redirectUrl);
 				});
 			}
@@ -149,7 +149,7 @@ router.get("/auth/google/logout", (req, res) => {
 				message: err,
 			});
 		}
-		res.redirect("http://localhost:3000/");
+		res.redirect(process.env.REACT_APP_URL);
 	});
 });
 

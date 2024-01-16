@@ -104,7 +104,7 @@ export const forgotPassword = async (req, res) => {
 		const resetToken = await isUser.getResetPasswordToken();
 		// console.log("resetToken: ", resetToken);
 
-		const resetPasswordUrl = `http://localhost:3000/reset-password/${isUser._id}/${resetToken}`;
+		const resetPasswordUrl = `${process.env.REACT_APP_URL}/reset-password/${isUser._id}/${resetToken}`;
 		// console.log("resetUrl: ", resetPasswordUrl);
 
 		const message = `Your password reset link is as follows:\n\n${resetPasswordUrl}\n\nPlease reset your password within 15 minutes.\n\nIf you have not requested this email, then ignore it.`;
