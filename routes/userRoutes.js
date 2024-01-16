@@ -112,6 +112,10 @@ router.get("/auth/google/login/success", async (req, res) => {
 router.post("/auth/google/register", async (req, res) => {
 	const { name, email, mobile, college } = req.body;
 	try {
+		const isMobile = await User.findOne({ mobile: mobile });
+		if (isMobile) {
+			return res.status(422).json({ message: "Mobile number already exists in Database" });
+		}
 		const newUser = await User.create({ name, email, mobile, college_name: college });
 
 		const token = await newUser.generateAuthToken();
