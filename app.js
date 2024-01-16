@@ -15,7 +15,7 @@ export const app = express();
 // Using Middlewares
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin: process.env.REACT_APP_URL,
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		credentials: true,
 	})
