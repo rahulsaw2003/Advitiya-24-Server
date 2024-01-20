@@ -37,7 +37,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 		if (!user) {
 			// Handle authentication failure
 			console.log("Authentication failed");
-			return res.redirect(`${process.env.REACT_APP_URL}/ login`);
+			return res.redirect(`${process.env.REACT_APP_URL}/login`);
 		}
 
 		try {
