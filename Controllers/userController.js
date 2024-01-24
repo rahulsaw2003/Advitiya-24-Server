@@ -1,4 +1,4 @@
-import User from "./model.js";
+import User from "../mongoDB/model.js";
 import bcrpt from "bcryptjs";
 import sendEmail from "../utils/sendEmail.js";
 import bcrypt from "bcryptjs";

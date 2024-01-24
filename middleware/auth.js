@@ -1,4 +1,4 @@
-import User from "../User/model.js";
+import User from "../mongoDB/model.js";
 import jwt from "jsonwebtoken";
 
 export const isUser = async (req, res, next) => {

@@ -1,7 +1,7 @@
 import express from "express";
-import { loginUser, registerUser, logoutUser, validateUser, forgotPassword, resetPassword } from "../User/controller.js";
+import { loginUser, registerUser, logoutUser, validateUser, forgotPassword, resetPassword } from "../Controllers/userController.js";
 import { isUser } from "../middleware/auth.js";
-import User from "../User/model.js";
+import User from "../mongoDB/model.js";
 import passport from "passport";
 import sendEmail from "../utils/sendEmail.js";
 
