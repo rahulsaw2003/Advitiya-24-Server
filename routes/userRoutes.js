@@ -9,7 +9,7 @@ const router = express.Router();
 
 //test route
 router.get("/", (req, res) => {
-	res.send("ADVITIYA Server is running...");
+	res.send("ADVITIYA Server is running on secure connection.");
 });
 
 // SignUP Route
