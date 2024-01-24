@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   build:
@@ -15,17 +15,28 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v3
+    - name: Check for .env changes
+      id: check-env-changes
+      run: |
+        echo "Changed files:"
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+        env_changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -c '^\.env$')
+        echo "::set-output name=env_changed::${env_changed}"
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: |
-        touch .env
+    - name: Install dependencies
+      if: steps.check-env-changes.outputs.env_changed == '1'
+      run: npm ci
+    - name: Update .env file
+      if: steps.check-env-changes.outputs.env_changed == '1'
+      run: |
         echo "${{ secrets.ADVITIYA_PROD_ENV_FILE }}" > .env
-    - run: pm2 restart AdvitiyaBackendAPI
+    - name: Restart PM2
+      if: steps.check-env-changes.outputs.env_changed == '1'
+      run: pm2 restart AdvitiyaBackendAPI
