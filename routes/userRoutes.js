@@ -7,6 +7,11 @@ import sendEmail from "../utils/sendEmail.js";
 
 const router = express.Router();
 
+//test route
+router.get("/", (req, res) => {
+	res.send("ADVITIYA Server is running...");
+});
+
 // SignUP Route
 router.post("/register", registerUser);
 
