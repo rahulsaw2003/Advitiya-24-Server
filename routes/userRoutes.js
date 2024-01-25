@@ -80,6 +80,7 @@ router.get("/auth/google/callback", (req, res, next) => {
 });
 
 router.get("/auth/google/login/success", async (req, res) => {
+	console.log(req.user);
 	if (req.user) {
 		try {
 			const isUser = await User.findOne({ email: req.user.email });
